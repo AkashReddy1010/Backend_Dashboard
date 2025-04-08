@@ -1,6 +1,6 @@
 import React from 'react'
 import LandingPage from './vendorDashboard/pages/LandingPage'
-import "./app.css"
+import "./App.css"
 import {Routes,Route} from 'react-router-dom'
 import NotFound from './vendorDashboard/components/NotFound'
 
