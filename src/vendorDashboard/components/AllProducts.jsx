@@ -27,13 +27,8 @@ const AllProducts = () => {
         try {
             const response = await fetch(`${API_URL}/product/${productId}`,{
                 method: "DELETE",
-                headers: {
-                //   'Authorization': `Bearer ${token}`, // if needed
-                  'Content-Type': 'application/json'
-                }
             })
             const data = await response.json()
-            console.log(data)
             if(response.ok){
                 setProducts(products.filter(product=>product._id === productId));
                 confirm("Are you sure, you want to delete?")

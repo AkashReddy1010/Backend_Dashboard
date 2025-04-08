@@ -1,59 +1,101 @@
-import React, { useState } from 'react';
-import { API_URL } from '../../helpers/ApiPath';
+import React, { useState } from "react";
+import { API_URL } from "../../helpers/ApiPath";
+import { ThreeCircles } from "react-loader-spinner";
 
-const Login = ({showWelcomeHandler}) => {
-  const [email,setEmail] = useState("");
-  const [password,setPassword] = useState("");
+const Login = ({ showWelcomeHandler }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const loginHandler = async(e) => {
+  const handleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const loginHandler = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/vendor/login`,{
-        method:'POST',
+      const response = await fetch(`${API_URL}/vendor/login`, {
+        method: "POST",
         headers: {
-          'Content-Type':'application/json'
+          "Content-Type": "application/json",
         },
-        body:JSON.stringify({email,password})
-      })
+        body: JSON.stringify({ email, password }),
+      });
       const data = await response.json();
-      if(response.ok) {
+      if (response.ok) {
         alert("Login success");
         setEmail("");
         setPassword("");
-        localStorage.setItem('loginToken',data.token);
+        localStorage.setItem("loginToken", data.token);
         showWelcomeHandler();
       }
       const vendorId = data.vendorId;
-      console.log("checking for vendorId",vendorId);
-      
-      const vendorResponse = await fetch(`${API_URL}/vendor/single-vendor/${vendorId}`)
+      console.log("checking for vendorId", vendorId);
+
+      const vendorResponse = await fetch(
+        `${API_URL}/vendor/single-vendor/${vendorId}`
+      );
+      window.location.reload();
       const vendorData = await vendorResponse.json();
-      if(vendorResponse.ok){
+      if (vendorResponse.ok) {
         const vendorFirmId = vendorData.vendorFirmId;
         const vendorFirmName = vendorData.vendor.firm[0].firmName;
-        localStorage.setItem('firmId',vendorFirmId);
-        localStorage.setItem('firmName',vendorFirmName);
-        window.location.reload()
+        localStorage.setItem("firmId", vendorFirmId);
+        localStorage.setItem("firmName", vendorFirmName);
       }
     } catch (error) {
       alert("login fail");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className='loginSection'>
-      <form className='authForm' onSubmit={loginHandler}>
-        <h3>Vendor Login</h3><br />
-        <label>Email</label>
-        <input type="text" name='email' value={email} onChange={(e)=> setEmail(e.target.value)} placeholder='Enter your email' /><br />
-        <label>Password</label>
-        <input type="password" name='password' value={password} onChange={(e)=> setPassword(e.target.value)} placeholder='Enter your password' /><br />
-        <div className="btnSubmit">
-            <button type='submit'>Submit</button>
+    <div className="loginSection">
+      {loading && <div className="loaderSection">
+          <ThreeCircles
+            visible={true}
+            height="100"
+            width="100"
+            color="#4fa94d"
+            ariaLabel="three-circles-loading"
+            wrapperStyle={{}}
+            wrapperClass=""
+          />
+          <p>Login in process... Please wait</p>
         </div>
-      </form>
+      }
+      {!loading && <form className="authForm" onSubmit={loginHandler} autoComplete="off">
+        <h3>Vendor Login</h3>
+        <label>Email</label>
+        <input
+          type="text"
+          name="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Enter your email"
+          />
+        <br />
+        <label>Password</label>
+        <input
+          type={showPassword? "text":"password"}
+          name="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Enter your password"
+          />
+        <br />
+        <span className="showPassword" onClick={handleShowPassword}>
+          {showPassword ? 'Hide' : 'show'}
+        </span>
+        <div className="btnSubmit">
+          <button type="submit">Submit</button>
+        </div>
+      </form>}
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
